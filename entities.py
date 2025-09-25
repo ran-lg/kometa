@@ -1,6 +1,25 @@
+from math import radians, cos, sin
+
 MAX_SPEED = 100
 SPEED_INCREMENT = 5
-ROTATION_INCREMENT = 5
+ROTATION_INCREMENT = 0.5
+
+# determine the points of the new polygon
+
+def rotate_polygon(angle, polygon):
+    angle_rad = radians(angle)
+    cos_a = cos(angle_rad)
+    sin_a = sin(angle_rad)
+
+    new_polygon = []
+
+    for x, y in polygon:
+        x2 = x * cos_a - y * sin_a
+        y2 = x * sin_a + y * cos_a
+        new_polygon.append((x2, y2))
+
+    return new_polygon
+
 
 class Entity():
     def __init__(self, x, y, speed, angle, *polygon):
@@ -31,7 +50,9 @@ polygon = {self.polygon}\n'''
         
         # update the polygon
         
-        # TBD
+        new_polygon = rotate_polygon(self.angle, self.polygon) 
+        self.polygon.clear()
+        self.polygon = new_polygon 
 
     def rotate_left(self):
          
@@ -48,7 +69,9 @@ polygon = {self.polygon}\n'''
 
         # update the polygon
         
-        # TBD
+        new_polygon = rotate_polygon(self.angle, self.polygon) 
+        self.polygon.clear()
+        self.polygon = new_polygon 
 
     def accelerate(self):
         pass
@@ -60,6 +83,9 @@ polygon = {self.polygon}\n'''
         self.angle += self.angle_speed
         
         # TBD
+
+    def polygon_to_draw(self):
+        return [(self.x + point[0], self.y + point[1]) for point in self.polygon]
 
 
 if __name__ == '__main__':
@@ -76,3 +102,4 @@ if __name__ == '__main__':
     my_entity.rotate_right()
     my_entity.rotate_right()
     print(my_entity)
+
