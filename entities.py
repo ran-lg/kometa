@@ -1,8 +1,8 @@
-from math import radians, cos, sin
+from math import radians, cos, sin, atan2, sqrt
 
 MAX_SPEED = 100
-SPEED_INCREMENT = 5
-ROTATION_INCREMENT = 0.5
+SPEED_INCREMENT = 0.2
+ROTATION_INCREMENT = 0.1
 
 # determine the points of the new polygon
 
@@ -20,12 +20,31 @@ def rotate_polygon(angle, polygon):
 
     return new_polygon
 
+# compute a speed vector norm
+
+def compute_speed_vector_norm(speed_vector):
+    x, y = speed_vector
+    return sqrt(x ** 2 + y ** 2) 
+
+# compute a new speed vector
+
+def determine_speed_vector(angle, speed_value):
+    return (speed_value * cos(angle), speed_value * sin(angle))
+
+# compute the angle of a speed vector
+
+def determine_vector_angle(speed_vector):
+    x, y = speed_vector
+    return atan2(x, y)
+
+
+
 
 class Entity():
-    def __init__(self, x, y, speed, angle, *polygon):
+    def __init__(self, x, y, speed_vector, angle, *polygon):
         self.x = x
         self.y = y
-        self.speed = speed
+        self.speed_vector = speed_vector
         self.angle = angle
         self.angle_speed = 0
         self.polygon = list(polygon)
@@ -74,15 +93,35 @@ polygon = {self.polygon}\n'''
         self.polygon = new_polygon 
 
     def accelerate(self):
-        pass
+        additional_vector = determine_speed_vector(self.angle, SPEED_INCREMENT)
+        new_speed_vector = tuple(map(sum, zip(self.speed_vector, additional_vector)))
 
-    def decelarate(self):
-        pass
+        if compute_speed_vector_norm(new_speed_vector) <= MAX_SPEED:
+            self.speed_vector = new_speed_vector 
 
-    def update(self):
+    def decelerate(self):
+        angle = determine_vector_angle(self.speed_vector)
+        speed_value = compute_speed_vector_norm(self.speed_vector)
+        speed_value -= SPEED_INCREMENT
+        if speed_value > 0:
+            self.speed_vector = determine_speed_vector(angle, speed_value)
+        else:
+            self.speed_vector = (0, 0)
+
+    def update(self, height, width):
         self.angle += self.angle_speed
-        
-        # TBD
+        self.x += self.speed_vector[0]
+        self.y += self.speed_vector[1]
+
+        if self.x > width:
+            self.x = self.x - width
+        elif self.x < 0:
+            self.x = width - self.x
+
+        if self.y > height:
+            self.y = self.y - height
+        elif self.y < 0:
+            self.y = height - self.y
 
     def polygon_to_draw(self):
         return [(self.x + point[0], self.y + point[1]) for point in self.polygon]
@@ -102,4 +141,3 @@ if __name__ == '__main__':
     my_entity.rotate_right()
     my_entity.rotate_right()
     print(my_entity)
-
