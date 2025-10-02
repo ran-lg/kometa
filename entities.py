@@ -2,7 +2,8 @@ from math import radians, cos, sin, atan2, sqrt
 
 MAX_SPEED = 100
 SPEED_INCREMENT = 0.2
-ROTATION_INCREMENT = 0.1
+DECELERATION = -0.02
+ROTATION_INCREMENT = 0.05
 
 # determine the points of the new polygon
 
@@ -37,6 +38,14 @@ def determine_vector_angle(speed_vector):
     x, y = speed_vector
     return atan2(x, y)
 
+# change the norm of the speed vector
+#       with value < 0
+#         or value > 0
+
+def change_norm_speed_vector(speed_vector, value):
+    angle = determine_vector_angle(speed_vector)
+    speed_value = compute_speed_vector_norm(speed_vector)
+    return determine_speed_vector (angle, speed_value + value)
 
 
 
@@ -122,6 +131,8 @@ polygon = {self.polygon}\n'''
             self.y = self.y - height
         elif self.y < 0:
             self.y = height - self.y
+            
+        self.speed_vector = change_norm_speed_vector(self.speed_vector, DECELERATION)
 
     def polygon_to_draw(self):
         return [(self.x + point[0], self.y + point[1]) for point in self.polygon]
